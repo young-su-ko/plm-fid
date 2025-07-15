@@ -4,6 +4,8 @@ Calculate Frechet Distance between sets of protein sequences using protein langu
 
 ## Installation
 
+**NOT AVAILABLE YET, DO NOT TRY**
+
 ```bash
 pip install plm-fid
 ```
