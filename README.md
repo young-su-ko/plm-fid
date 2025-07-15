@@ -13,7 +13,7 @@ pip install plm-fid
 ### Python API
 
 ```python
-from plm_fid.api import FrechetProteinDistance
+from plm_fid import FrechetProteinDistance
 import numpy as np
 import torch
 
