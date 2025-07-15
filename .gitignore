@@ -14,7 +14,5 @@ wheels/
 slurm_outputs/
 *.sh
 
-/tests
-/example
-cli.py
-/results
+example/
+results/

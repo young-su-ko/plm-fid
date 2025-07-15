@@ -51,7 +51,7 @@ def resolve_input_to_numpy(
     Returns
     -------
     embedding : np.ndarray
-        A 2D NumPy array of shape (N, D) representing the set ofprotein embeddings.
+        A 2D NumPy array of shape (N, D) representing the set of protein embeddings.
 
     Raises
     ------
@@ -79,7 +79,7 @@ def resolve_input_to_numpy(
         if path.suffix in [".npy", ".pt"]:
             embedding = load_embeddings_from_path(path)
         elif path.suffix == ".fasta":
-            embedding = embedder.embed_from_fasta(path)
+            embedding = embedder._embed_fasta(path)
         else:
             raise ValueError(f"Unsupported file type for set {set_name}: {path.suffix}")
     else:

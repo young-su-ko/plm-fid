@@ -16,49 +16,46 @@ hf_logging.set_verbosity_error()
 class ProteinEmbedder:
     def __init__(
         self,
-        model_name: str = PLM.ESM2_650M.value,
+        model: PLM = PLM.ESM2_650M,
         device: str | None = None,
         max_length: int = 1000,
         truncation_style: str = "center",
         batch_size: int = 1,
     ):
-        if device is None:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.device = device
+        self.device = self._get_device(device)
+        self.batch_size = batch_size
+        self.truncation_style = truncation_style
+        self.max_length = max_length
 
-        config = get_model_config(model_name)
-        model_class = config["model_class"]
-        tokenizer_class = config["tokenizer_class"]
-        model_kwargs = config["model_kwargs"]
-        tokenizer_kwargs = config["tokenizer_kwargs"]
-        self.preprocessor = config["preprocessor"]
+        config = get_model_config(str(model))
+        self.preprocessor = config.get("preprocessor")
 
-        # Check max_length against model constraints
-        model_max_length = config.get("max_sequence_length")
-        if model_max_length is not None and max_length > model_max_length:
-            warnings.warn(
-                f"Model '{model_name}' has a maximum sequence length of {model_max_length}. "
-                f"Provided max_length={max_length} will be capped.",
-                UserWarning,
-            )
-            max_length = model_max_length
+        # Adjust max_length if required by model (e.g., antiberta2-cssp)
+        model_max = config.get("max_sequence_length")
+        if model_max and max_length > model_max:
+            warnings.warn(f"Model max length is {model_max}. Truncating to that.")
+            self.max_length = model_max
 
-        self.model = model_class.from_pretrained(model_name, **model_kwargs).to(device)
+        self.model, self.tokenizer = self._load_model_and_tokenizer(model, config)
         self.model.eval()
 
-        if config["tokenizer_on_model"]:
-            self.tokenizer = self.model.tokenizer
-        else:
-            self.tokenizer = tokenizer_class.from_pretrained(
-                model_name, **tokenizer_kwargs
-            )
+    def _get_device(self, device):
+        return device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.max_length = max_length
-        assert truncation_style in ["end", "center"], (
-            "truncation_style must be 'end' or 'center'"
+    def _load_model_and_tokenizer(self, model, config):
+        model_instance = (
+            config["model_class"]
+            .from_pretrained(str(model), **config["model_kwargs"])
+            .to(self.device)
         )
-        self.truncation_style = truncation_style
-        self.batch_size = batch_size
+        # For now, only used by ESMplusplus models
+        if config["tokenizer_on_model"]:
+            tokenizer = model_instance.tokenizer
+        else:
+            tokenizer = config["tokenizer_class"].from_pretrained(
+                str(model), **config["tokenizer_kwargs"]
+            )
+        return model_instance, tokenizer
 
     def _truncate_sequence(self, sequence: str) -> str:
         if len(sequence) <= self.max_length:
@@ -100,12 +97,3 @@ class ProteinEmbedder:
             all_embeddings.append(batch_embeddings)
 
         return torch.cat(all_embeddings, dim=0)
-
-    def check_embedding_sizes(emb_a: np.ndarray, emb_b: np.ndarray):
-        if (
-            abs(len(emb_a) - len(emb_b)) > min(len(emb_a), len(emb_b)) * 0.1
-        ):  # 10% difference
-            warnings.warn(
-                f"Embedding sets have significantly different sizes ({len(emb_a)} vs {len(emb_b)}). "
-                "This may affect the reliability of the covariance estimation."
-            )

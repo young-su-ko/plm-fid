@@ -9,6 +9,7 @@ from pathlib import Path
 import warnings
 import numpy as np
 import torch
+import logging
 
 
 class FrechetProteinDistance:
@@ -19,14 +20,23 @@ class FrechetProteinDistance:
         max_length: int = 1000,
         truncation_style: str = "end",
         batch_size: int = 1,
+        save_embeddings: bool = False,
+        output_dir: str | Path = ".",
     ):
         self.model = model
+        self.device = device
+        self.max_length = max_length
+        self.truncation_style = truncation_style
+        self.batch_size = batch_size
+        self.save_embeddings = save_embeddings
+        self.output_dir = output_dir
+
         self.embedder = ProteinEmbedder(
-            model_name=str(model),
-            device=device,
-            max_length=max_length,
-            truncation_style=truncation_style,
-            batch_size=batch_size,
+            model=self.model,
+            device=self.device,
+            max_length=self.max_length,
+            truncation_style=self.truncation_style,
+            batch_size=self.batch_size,
         )
 
     def compute_fid(
@@ -97,10 +107,18 @@ class FrechetProteinDistance:
                 f"Ensure they were generated using the same model ({self.model}).",
                 UserWarning,
             )
-
+        logging.info("Resolving input A...")
         emb_a = resolve_input_to_numpy(set_a, "A", self.embedder)
+        logging.info("Resolving input B...")
         emb_b = resolve_input_to_numpy(set_b, "B", self.embedder)
 
+        if self.save_embeddings:
+            logging.info(f"Saving embeddings to {self.output_dir}")
+            self.output_dir.mkdir(parents=True, exist_ok=True)
+            np.save(self.output_dir / "emb_a.npy", emb_a)
+            np.save(self.output_dir / "emb_b.npy", emb_b)
+
+        logging.info("Computing mean and covariance...")
         mu_a, sigma_a = get_mu_sigma(emb_a)
         mu_b, sigma_b = get_mu_sigma(emb_b)
 
