@@ -1,0 +1,25 @@
+[project]
+name = "plm-fid"
+version = "0.1.0"
+description = "Calculate Fréchet distance for protein language model embeddings"
+authors = [{ name="Young Su Ko", email="youngsuko2000@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.12, <3.13"
+dependencies = [
+    "biopython>=1.85",
+    "click>=8.2.1",
+    "einops>=0.8.1",
+    "numpy>=2.3.1",
+    "protobuf>=6.31.1",
+    "pytest>=8.4.1",
+    "rjieba>=0.1.13",
+    "ruff>=0.12.3",
+    "scipy>=1.16.0",
+    "sentencepiece>=0.2.0",
+    "torch>=2.7.1",
+    "tqdm>=4.67.1",
+    "transformers>=4.53.2",
+]
+
+[project.scripts]
+plm-fid = "plm_fid.cli:main"
