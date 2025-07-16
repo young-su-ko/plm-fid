@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Calculate Fréchet distance for protein language model embeddings"
 authors = [{ name="Young Su Ko", email="youngsuko2000@gmail.com" }]
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.12, <3.13"
 dependencies = [
     "biopython>=1.85",

@@ -27,33 +27,33 @@ class ProteinEmbedder:
         self.truncation_style = truncation_style
         self.max_length = max_length
 
-        config = get_model_config(str(model))
-        self.preprocessor = config.get("preprocessor")
+        self.config = get_model_config(str(model))
+        self.preprocessor = self.config.get("preprocessor")
 
         # Adjust max_length if required by model (e.g., antiberta2-cssp)
-        model_max = config.get("max_sequence_length")
+        model_max = self.config.get("max_sequence_length")
         if model_max and max_length > model_max:
             warnings.warn(f"Model max length is {model_max}. Truncating to that.")
             self.max_length = model_max
 
-        self.model, self.tokenizer = self._load_model_and_tokenizer(model, config)
+        self.model, self.tokenizer = self._load_model_and_tokenizer(model)
         self.model.eval()
 
     def _get_device(self, device):
         return device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-    def _load_model_and_tokenizer(self, model, config):
+    def _load_model_and_tokenizer(self, model: PLM):
         model_instance = (
-            config["model_class"]
-            .from_pretrained(str(model), **config["model_kwargs"])
+            self.config["model_class"]
+            .from_pretrained(str(model), **self.config["model_kwargs"])
             .to(self.device)
         )
         # For now, only used by ESMplusplus models
-        if config["tokenizer_on_model"]:
+        if self.config["tokenizer_on_model"]:
             tokenizer = model_instance.tokenizer
         else:
-            tokenizer = config["tokenizer_class"].from_pretrained(
-                str(model), **config["tokenizer_kwargs"]
+            tokenizer = self.config["tokenizer_class"].from_pretrained(
+                str(model), **self.config["tokenizer_kwargs"]
             )
         return model_instance, tokenizer
 
