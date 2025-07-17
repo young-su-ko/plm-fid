@@ -59,7 +59,7 @@ emb_b = torch.load("embeddings_b.pt")     # shape: [N, D]
 distance = fid.compute_fid(emb_a, emb_b)
 ```
 > [!NOTE]
-> Note: All API arguments are shared with the CLI, except using underscores instead of dash (e.g. `model_name`)
+> All API arguments are shared with the CLI, except using underscores instead of dash (e.g. `model_name`)
 
 ### Automatic Format Resolution
 The `compute_fid()` method accepts:
@@ -89,8 +89,8 @@ fid.compute_fid(set_a "emb_b.pt")
 
 - When mixing FASTA with pre-computed embeddings, make sure the model used to embed the FASTA file is the same as the one used to generate the `.npy` or `.pt` embeddings. A warning will be issued if there’s a mismatch.
     - If the embedding dimensions differ, `calculate_frechet_distance()` in `distance.py` will raise an error.
-    - > [!WARNING]  
-        > However, if **different models produce embeddings of the same dimension**, this will not raise an error, but the FID is likely meaningless.
+> [!WARNING]  
+> However, if **different models produce embeddings of the same dimension**, this will not raise an error, but the FID is likely meaningless.
 - AntiBERTa2 has a max sequence length of 254. This will be enforced automatically.
 
 ## Examples
