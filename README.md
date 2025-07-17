@@ -39,6 +39,7 @@ plm-fid setA.fasta setB.fasta --model-name esm2_8m
 
 | CLI Only Arguments | Description |
 | --- | --- |
+|`round`          | Number of decimal places to round the final Fréchet distance result to. Defaults to `2`. |   
 |`verbose`          | Show progress messages. Disabled by default. |   
 
 
@@ -51,7 +52,7 @@ import torch
 
 fid = FrechetProteinDistance(model_name="esmplusplus_small")
 
-# Using raw NumPy arrays or PyTorch tensors
+# Using saved NumPy arrays or PyTorch tensors
 emb_a = np.load("embeddings_a.npy")       # shape: [N, D]
 emb_b = torch.load("embeddings_b.pt")     # shape: [N, D]
 
@@ -75,7 +76,9 @@ fid.compute_fid("set_a.fasta", "set_b.fasta")
 fid.compute_fid("emb_a.npy", "emb_b.pt")
 
 # Mixed input
-fid.compute_fid("set_a.fasta", "emb_b.npy")
+import numpy as np
+set_a = np.random.randn(10, 1280)
+fid.compute_fid(set_a "emb_b.pt")
 ```
 
 > [!IMPORTANT] 
@@ -84,8 +87,10 @@ fid.compute_fid("set_a.fasta", "emb_b.npy")
 
 ### **Important Notes**
 
-- **When mixing FASTA with pre-computed embeddings**, ensure the model used at inference matches the one used to generate the `.npy` or `.pt` files. A warning will be shown otherwise.
-    - If **model is different but dimensions are the same**, this will fail silently!
+- When mixing FASTA with pre-computed embeddings, make sure the model used to embed the FASTA file is the same as the one used to generate the `.npy` or `.pt` embeddings. A warning will be issued if there’s a mismatch.
+    - If the embedding dimensions differ, `calculate_frechet_distance()` in `distance.py` will raise an error.
+    - > [!WARNING]  
+        > However, if **different models produce embeddings of the same dimension**, this will not raise an error, but the FID is likely meaningless.
 - AntiBERTa2 has a max sequence length of 254. This will be enforced automatically.
 
 ## Examples

@@ -75,6 +75,12 @@ from .models import MODEL_MAP
     help="Directory to save embeddings if --save-embeddings is enabled.",
 )
 @click.option(
+    "--round",
+    type=int,
+    default=2,
+    help="How many decimal places to round the FID to.",
+)
+@click.option(
     "--verbose",
     is_flag=True,
     help="Show progress messages",
@@ -89,6 +95,7 @@ def main(
     batch_size,
     save_embeddings,
     output_dir,
+    round,
     verbose,
 ):
     if verbose:
@@ -107,7 +114,7 @@ def main(
     )
 
     distance = fid.compute_fid(set_a, set_b)
-    click.echo(f"FID: {distance}")
+    click.echo(f"FID: {distance:.{round}f}")
 
 
 if __name__ == "__main__":
