@@ -1,8 +1,16 @@
 # pLM-FID: Protein Language Model Frechet Distance
 
-Calculate Frechet Distance between sets of protein sequences using protein language model embeddings.
+This tool computes the Fréchet Distance between two sets of protein sequences based on their protein language model (pLM) embeddings.
+
+When you pass in FASTA files, the specified model is loaded from the HuggingFace Hub using `transformers`. 
+> [!NOTE]  
+> If it's your first time using a given model, the weights will be downloaded and cached locally (this can take some time, especially for large models).
+
+Each protein sequence is then embedded using the selected pLM. We apply mean pooling across the sequence dimension to obtain a fixed-size vector for each protein. After embedding both sets, we compute the mean vector and covariance matrix of each set. These summary statistics are then used to calculate the Fréchet Distance.
 
 ## Installation
+> [!IMPORTANT]  
+> Python >= 3.10 required. `sentencepiece` will give some issues with Python 3.13, so I recommend any version >=3.10, <3.13.
 ```bash
 # if you have torch>=2.0 already installed
 pip install plm-fid
@@ -13,25 +21,13 @@ pip install plm-fid[torch]
 
 ## Usage
 
-### Python API
-
-```python
-from plm_fid import FrechetProteinDistance
-import numpy as np
-import torch
-
-fid = FrechetProteinDistance()
-
-# Using raw NumPy arrays or PyTorch tensors
-emb_a = np.load("embeddings_a.npy")       # shape: [N, D]
-emb_b = torch.load("embeddings_b.pt")     # shape: [N, D]
-
-distance = fid.compute_fid(emb_a, emb_b)
+### CLI
+```bash
+plm-fid setA.fasta setB.fasta --model-name esm2_8m
 ```
-
-| API/CLI Arguments | Description |
+| CLI/API Arguments | Description |
 | --- | --- |
-|`model`            | 	The protein language model to use. Accepts either a PLM enum value or a lowercase string, such as `esm2_8m`, `protbert`, or `antiberta2_cssp`. Only used when input files are in FASTA format. Defaults to `esm2_650m`.|
+|`model-name`            | 	The protein language model to use. Please specify a lowercase string, such as `esm2_8m`, `protbert`, or `antiberta2_cssp`. See available models with `FrechetProteinDistance.available_models()`. Defaults to `esm2_650m`.|
 |`device`           |	The device to run the model on, e.g., `cuda:0` or `cpu`. Defaults to cuda if available, otherwise `cpu`.|
 |`max-length`       | Maximum length for each protein sequence. Longer sequences are truncated according to the selected truncation style. Some models may require a smaller max length (e.g., `antiberta2_cssp` supports up to 254). Defaults to `1000`.|
 |`truncation-style` | How to truncate sequences longer than max-length. Use `end` to truncate from the back, or `center` to keep the central region. Defaults to `center`.|
@@ -39,21 +35,37 @@ distance = fid.compute_fid(emb_a, emb_b)
 |`save-embeddings`  | Whether to save the computed embeddings to `.npy` files. Useful for reuse or debugging. Disabled by default. |
 |`output-dir`       | Directory to save output files if `--save-embeddings` is enabled. Defaults to current directory (`.`). |   
 
-### CLI
-```bash
-plm-fid setA.fasta setB.fasta --model esm2_8m
-```
+
 | CLI Only Arguments | Description |
 | --- | --- |
 |`verbose`          | Show progress messages. Disabled by default. |   
+
+
+### Python API
+
+```python
+from plm_fid import FrechetProteinDistance
+import numpy as np
+import torch
+
+fid = FrechetProteinDistance(model_name="esmplusplus_small")
+
+# Using raw NumPy arrays or PyTorch tensors
+emb_a = np.load("embeddings_a.npy")       # shape: [N, D]
+emb_b = torch.load("embeddings_b.pt")     # shape: [N, D]
+
+distance = fid.compute_fid(emb_a, emb_b)
+```
 > [!NOTE]
-> Note: All other CLI options (`--model`, `--device`, etc.) map directly to the Python API arguments listed above.
+> Note: All API arguments are shared with the CLI, except using underscores instead of dash (e.g. `model_name`)
 
 ### Automatic Format Resolution
 The `compute_fid()` method accepts:
 - `.fasta` file paths
 - `.npy` or `.pt` file paths
 - In-memory NumPy arrays or PyTorch tensors
+
+Any combination of the above are accepted by `compute_fid`.
 ```python
 # FASTA
 fid.compute_fid("set_a.fasta", "set_b.fasta")
@@ -76,15 +88,10 @@ fid.compute_fid("set_a.fasta", "emb_b.npy")
 - AntiBERTa2 has a max sequence length of 254. This will be enforced automatically.
 
 ## Examples
-
-We have two test cases in which pLM-based Fréchet distance should be able to meaningfully distinguish two different sets of protein sequences.
-
-The fasta files for these examples are located in `example/cath` and `example/antibodies` respectively.
-
 ### Distinguishing CATH Classes
 We use the [CATH S20 dataset](https://www.google.com/placeholderfornow) to compare Class 1 and Class 2 proteins. Class 1 proteins are primarily **alpha-helical**, while Class 2 are mostly **beta-sheet**.
 
-We provide three FASTA files:
+We provide three FASTA files in `examples/`
 - `class1.fasta`: Class 1 proteins (1953 sequences)
 - `class2.fasta`: Class 2 proteins (1953 sequences)
 - `reference.fasta`: A different subset of Class 1 proteins, also 1953 sequences
@@ -113,12 +120,14 @@ Even though CATH classification is structural, we expect pLM embeddings to encod
 | ESM++ (L)| 0.01 | 0.11 |
  
 
-### Distinguishing some binding antibodies (?)
+<!-- ### Distinguishing some binding antibodies (?)
 
 #### Results
 | Model | plmFID(ref, class1) | plmFID(ref, class2) |
 | --- | --- | --- |
-| AntiBERTa2-CSSP | X | X |
+| AntiBERTa2-CSSP | X | X | -->
+
+## Acknowledgements
 
 ## License
 MIT 

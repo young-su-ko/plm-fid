@@ -3,7 +3,7 @@ from pathlib import Path
 import logging
 
 from .api import FrechetProteinDistance
-from .models import PLM
+from .models import MODEL_MAP
 
 
 @click.command(
@@ -19,11 +19,11 @@ from .models import PLM
 @click.argument("set_a", type=click.Path(exists=True, path_type=Path))
 @click.argument("set_b", type=click.Path(exists=True, path_type=Path))
 @click.option(
-    "--model",
-    type=click.Choice([p for p in PLM], case_sensitive=False),
-    default=PLM.ESM2_650M,
+    "--model-name",
+    type=click.Choice([p for p in MODEL_MAP.keys()], case_sensitive=True),
+    default="esm2_650m",
     help=(
-        "The protein language model to use. Accepts one of the PLM enum values. See --help for available models."
+        "The protein language model to use. Accepts one of the model names. See --help for available models."
     ),
 )
 @click.option(
@@ -79,11 +79,10 @@ from .models import PLM
     is_flag=True,
     help="Show progress messages",
 )
-@click.option("--verbose", is_flag=True, help="Show progress messages")
 def main(
     set_a,
     set_b,
-    model,
+    model_name,
     device,
     max_length,
     truncation_style,
@@ -98,7 +97,7 @@ def main(
         logging.basicConfig(level=logging.WARNING)
 
     fid = FrechetProteinDistance(
-        model=model,
+        model_name=model_name,
         device=device,
         max_length=max_length,
         truncation_style=truncation_style,

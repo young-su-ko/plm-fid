@@ -6,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 from transformers import logging as hf_logging
 
-from .models import PLM
+from .models import MODEL_MAP
 from .model_configs import get_model_config
 
 
@@ -16,7 +16,7 @@ hf_logging.set_verbosity_error()
 class ProteinEmbedder:
     def __init__(
         self,
-        model: PLM = PLM.ESM2_650M,
+        model_name: str = "esm2_650m",
         device: str | None = None,
         max_length: int = 1000,
         truncation_style: str = "center",
@@ -26,8 +26,8 @@ class ProteinEmbedder:
         self.batch_size = batch_size
         self.truncation_style = truncation_style
         self.max_length = max_length
-
-        self.config = get_model_config(str(model))
+        self.model_path = MODEL_MAP[model_name]
+        self.config = get_model_config(self.model_path)
         self.preprocessor = self.config.get("preprocessor")
 
         # Adjust max_length if required by model (e.g., antiberta2-cssp)
@@ -36,16 +36,16 @@ class ProteinEmbedder:
             warnings.warn(f"Model max length is {model_max}. Truncating to that.")
             self.max_length = model_max
 
-        self.model, self.tokenizer = self._load_model_and_tokenizer(model)
+        self.model, self.tokenizer = self._load_model_and_tokenizer(model_name)
         self.model.eval()
 
     def _get_device(self, device):
         return device or ("cuda" if torch.cuda.is_available() else "cpu")
 
-    def _load_model_and_tokenizer(self, model: PLM):
+    def _load_model_and_tokenizer(self, model_name: str):
         model_instance = (
             self.config["model_class"]
-            .from_pretrained(str(model), **self.config["model_kwargs"])
+            .from_pretrained(self.model_path, **self.config["model_kwargs"])
             .to(self.device)
         )
         # For now, only used by ESMplusplus models
@@ -53,7 +53,7 @@ class ProteinEmbedder:
             tokenizer = model_instance.tokenizer
         else:
             tokenizer = self.config["tokenizer_class"].from_pretrained(
-                str(model), **self.config["tokenizer_kwargs"]
+                self.model_path, **self.config["tokenizer_kwargs"]
             )
         return model_instance, tokenizer
 
