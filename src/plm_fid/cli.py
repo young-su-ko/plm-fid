@@ -22,39 +22,62 @@ from .models import PLM
     "--model",
     type=click.Choice([p for p in PLM], case_sensitive=False),
     default=PLM.ESM2_650M,
-    help="Protein language model to use for embedding, if using .fasta files",
+    help=(
+        "The protein language model to use. Accepts one of the PLM enum values. See --help for available models."
+    ),
 )
 @click.option(
     "--device",
     type=str,
     default=None,
-    help="Device to run the pLM on, e.g., 'cuda:0' or 'cpu'.",
+    help=(
+        "The device to run the model on, e.g., 'cuda:0' or 'cpu'. "
+        "Defaults to 'cuda' if available, otherwise 'cpu'."
+    ),
 )
 @click.option(
     "--max-length",
     type=int,
     default=1000,
-    help="Maximum sequence length for the pLM. Note: Some models have specific length constraints (e.g., antiberta2-cssp requires max_length ≤ 254).",
+    help=(
+        "Maximum length for each protein sequence. Longer sequences are truncated "
+        "according to the selected truncation style. Some models may require a smaller max length "
+        "(e.g., antiberta2_cssp supports up to 254)."
+    ),
 )
 @click.option(
     "--truncation-style",
     type=click.Choice(["end", "center"]),
-    default="end",
-    help="Truncation style for long sequences. End truncates the sequence from the end, center truncates from the center.",
+    default="center",
+    help=(
+        "How to truncate sequences longer than max length. "
+        "'end' truncates from the back, 'center' keeps the central region."
+    ),
 )
 @click.option(
-    "--batch-size", type=int, default=1, help="Batch size for protein embedding"
+    "--batch-size",
+    type=int,
+    default=1,
+    help="Number of sequences to embed per batch.",
 )
 @click.option(
     "--save-embeddings",
     is_flag=True,
-    help="Save computed embeddings as an .npy file. Useful if you want to reuse embeddings in future runs.",
+    help=(
+        "Whether to save the embeddings used for FID computation to .npy files. "
+        "Useful for reuse or debugging."
+    ),
 )
 @click.option(
     "--output-dir",
     type=click.Path(file_okay=False, path_type=Path),
     default=".",
-    help="Directory to save output files. If --save-embeddings is used, the embeddings will be saved in this directory.",
+    help="Directory to save embeddings if --save-embeddings is enabled.",
+)
+@click.option(
+    "--verbose",
+    is_flag=True,
+    help="Show progress messages",
 )
 @click.option("--verbose", is_flag=True, help="Show progress messages")
 def main(
