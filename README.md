@@ -1,4 +1,5 @@
 # pLM-FID: Protein Language Model Frechet Distance
+![trimmed1](https://github.com/user-attachments/assets/6c107d87-3ddf-42bb-a306-61bc1f829fb5)
 
 This tool computes the Fréchet Distance between two sets of protein sequences based on their protein language model (pLM) embeddings.
 
