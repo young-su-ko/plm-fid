@@ -102,12 +102,10 @@ We provide three FASTA files in `examples/`
 - `class2.fasta`: Class 2 proteins (1953 sequences)
 - `reference.fasta`: A different subset of Class 1 proteins, also 1953 sequences
 
-
-Our hypothesis is that
-$$
+Our hypothesis is that:
+```math
 \texttt{plmFID}(\text{ref, class1}) < \texttt{plmFID}(\text{ref, class2})
-$$
-
+```
 Even though CATH classification is structural, we expect pLM embeddings to encode features that reflect these differences in fold.
 
 #### Results
