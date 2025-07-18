@@ -33,7 +33,7 @@ class FrechetProteinDistance:
 
     truncation_style : {"center", "end"}, default="end"
         How to truncate sequences longer than `max_length`. "end" truncates from the back,
-        "center" removes the central region.
+        "center" removes from the center, preserving N- and C-termini.
 
     batch_size : int, default=1
         Number of sequences to embed per batch.
@@ -178,7 +178,10 @@ class FrechetProteinDistance:
         mu_b, sigma_b = get_mu_sigma(emb_b)
 
         logging.info("Computing distance...")
-        return float(calculate_frechet_distance(mu_a, sigma_a, mu_b, sigma_b))
+        fid = float(calculate_frechet_distance(mu_a, sigma_a, mu_b, sigma_b))
+
+        # Clip to zero to avoid returning tiny negative values from numerical errors (e.g., -1e-14)
+        return max(0, fid)
 
     @staticmethod
     def available_models() -> list[str]:

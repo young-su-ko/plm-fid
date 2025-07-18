@@ -51,7 +51,7 @@ from .models import MODEL_MAP
     default="center",
     help=(
         "How to truncate sequences longer than max length. "
-        "'end' truncates from the back, 'center' removes the central region."
+        "'end' truncates from the back, 'center' removes from the center, preserving N- and C-termini."
     ),
 )
 @click.option(

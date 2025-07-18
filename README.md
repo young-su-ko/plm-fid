@@ -40,7 +40,7 @@ plm-fid setA.fasta setB.fasta
 |`model-name`            | 	The protein language model to use. Please specify a lowercase string, such as `esm2_8m`, `protbert`, or `antiberta2_cssp`. With API, see available models with `FrechetProteinDistance.available_models()`. For CLI use `--help`. Defaults to `esm2_650m`.|
 |`device`           |	The device to run the model on, e.g., `cuda:0` or `cpu`. Defaults to cuda if available, otherwise `cpu`.|
 |`max-length`       | Maximum length for each protein sequence. Longer sequences are truncated according to the selected truncation style. Some models may require a smaller max length (e.g., `antiberta2_cssp` supports up to 254). Defaults to `1000`.|
-|`truncation-style` | How to truncate sequences longer than max-length. Use `end` to truncate from the back, or `center` to remove the central region. Defaults to `center`.|
+|`truncation-style` | How to truncate sequences longer than max-length. Use `end` to truncate from the back, or `center` to remove from the center, preserving N- and C-termini. Defaults to `center`.|
 |`batch-size`       | Number of sequences to embed per batch. Adjust according to available memory. Defaults to `1`.| 
 |`save-embeddings`  | Whether to save the computed embeddings to `.npy` files. Useful for reuse or debugging. Disabled by default. |
 |`output-dir`       | Directory to save output files if `--save-embeddings` is enabled. Defaults to current directory (`.`). |   
