@@ -13,11 +13,11 @@ Each protein sequence is then embedded using the selected pLM. We apply mean poo
 > [!IMPORTANT]  
 > Python >= 3.10 required. `sentencepiece` will give some issues with Python 3.13, so I recommend any version >=3.10, <3.13.
 ```bash
-# if you have torch>=2.0 already installed
+# please have torch>=2.0 installed!
 pip install plm-fid
 
-# else
-pip install plm-fid[torch]
+#or with uv (highly recommended)
+uv add plm-fid
 ```
 
 ## Usage
