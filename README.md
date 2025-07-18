@@ -175,9 +175,13 @@ These initial sanity checks suggest that pLM-based FID can distinguish between p
 
 ## Acknowledgements
 
-### Existing works using FID-inspired metrics for proteins 
+### FID
 
-I'd like to make it clear that pLM-based FID is not a **new idea**--here are the papers I've read through mentioning the use of pLM-based FID as well as FID-derivatives for assessing protein generations[^1].
+Here's the paper that introduced FID: [GANs Trained by a Two Time-Scale Update Rule Converge to a Local Nash Equilibrium](https://arxiv.org/abs/1706.08500). I also wrote a short memo about FID and it's predecessor Inception Score [here](https://young-su-ko.github.io/notebook/fid.html).
+
+### Existing works using Fréchet pLM Distance
+
+I'd like to make it clear that pLM-based FID is not a **new idea**--here are the papers I've seen mention the use of pLM-based FID for assessing protein generations[^1].
 
 - [Protein generation with evolutionary diffusion: sequence is all you need](https://www.biorxiv.org/content/10.1101/2023.09.11.556673v1), Alamdari et al., 2023
 - [Sampling Protein Language Models for Functional Protein Design](https://www.mlsb.io/papers_2023/Sampling_Protein_Language_Models_for_Functional_Protein_Design.pdf), Darmawan et al., 2023
