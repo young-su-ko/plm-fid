@@ -29,7 +29,7 @@ class TestProteinEmbedder:
     def test_center_truncation(self):
         embedder = ProteinEmbedder(truncation_style="center", max_length=3)
         test_sequence = "PAAAP"
-        assert embedder._truncate_sequence(test_sequence) == "AAA"
+        assert embedder._truncate_sequence(test_sequence) == "PP"
 
     def test_antiberta2_cssp_max_length(self):
         embedder = ProteinEmbedder(model_name="antiberta2_cssp", max_length=1000)

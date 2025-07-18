@@ -37,10 +37,10 @@ plm-fid setA.fasta setB.fasta
 
 | CLI/API Arguments | Description |
 | --- | --- |
-|`model-name`            | 	The protein language model to use. Please specify a lowercase string, such as `esm2_8m`, `protbert`, or `antiberta2_cssp`. See available models with `FrechetProteinDistance.available_models()`. Defaults to `esm2_650m`.|
+|`model-name`            | 	The protein language model to use. Please specify a lowercase string, such as `esm2_8m`, `protbert`, or `antiberta2_cssp`. With API, see available models with `FrechetProteinDistance.available_models()`. For CLI use `--help`. Defaults to `esm2_650m`.|
 |`device`           |	The device to run the model on, e.g., `cuda:0` or `cpu`. Defaults to cuda if available, otherwise `cpu`.|
 |`max-length`       | Maximum length for each protein sequence. Longer sequences are truncated according to the selected truncation style. Some models may require a smaller max length (e.g., `antiberta2_cssp` supports up to 254). Defaults to `1000`.|
-|`truncation-style` | How to truncate sequences longer than max-length. Use `end` to truncate from the back, or `center` to keep the central region. Defaults to `center`.|
+|`truncation-style` | How to truncate sequences longer than max-length. Use `end` to truncate from the back, or `center` to remove the central region. Defaults to `center`.|
 |`batch-size`       | Number of sequences to embed per batch. Adjust according to available memory. Defaults to `1`.| 
 |`save-embeddings`  | Whether to save the computed embeddings to `.npy` files. Useful for reuse or debugging. Disabled by default. |
 |`output-dir`       | Directory to save output files if `--save-embeddings` is enabled. Defaults to current directory (`.`). |   
@@ -175,7 +175,33 @@ These initial sanity checks suggest that pLM-based FID can distinguish between p
 
 ## Acknowledgements
 
+### Existing works using FID-inspired metrics for proteins 
+
+I'd like to make it clear that pLM-based FID is not a **new idea**--here are the papers I've read through mentioning the use of pLM-based FID as well as FID-derivatives for assessing protein generations[^1].
+
+- [Protein generation with evolutionary diffusion: sequence is all you need](https://www.biorxiv.org/content/10.1101/2023.09.11.556673v1), Alamdari et al., 2023
+- [Sampling Protein Language Models for Functional Protein Design](https://www.mlsb.io/papers_2023/Sampling_Protein_Language_Models_for_Functional_Protein_Design.pdf), Darmawan et al., 2023
+- [Diffusion on language model encodings for protein sequence generation](https://arxiv.org/abs/2403.03726), Meshchaninov et al., 2024
+- [Assessing Generative Model Coverage of Protein Structures with SHAPES](https://www.biorxiv.org/content/10.1101/2025.01.09.632260v2.full), Lu et al., 2025
+- [ProtFlow: Fast Protein Sequence Design via Flow Matching on Compressed Protein Language Model Embeddings](https://arxiv.org/abs/2504.10983v1), Kong et al., 2025
+- [Protein FID: Improved Evaluation of Protein Structure Generative Models](https://arxiv.org/abs/2505.08041), Faltings et al., 2025.
+
+### Code
+
+- Fréchet distance calculation implementation by [Dougal J. Sutherland](https://github.com/bioinf-jku/TTUR/blob/master/fid.py)
+- `center` trunctation idea comes from [Feature Reuse and Scaling: Understanding Transfer Learning with Protein Language Models](https://proceedings.mlr.press/v235/li24a.html):
+    > "targeting signals often occur at the N- or C- terminal, and we reason that taking both terminals preserves biologically-relevant signals."
+
+### Protein language models
+
+| Model | Team | Link   | Paper |
+| --- | --- | --- | --- |
+| ESM2 | FAIR  | [Github](https://github.com/facebookresearch/esm)  | [Evolutionary-scale prediction of atomic-level protein structure with a language model](https://www.science.org/doi/10.1126/science.ade2574) |
+| ProtBert (BFD) | RostLab | [HuggingFace](https://huggingface.co/Rostlab/prot_bert) | [ProtTrans: Toward Understanding the Language of Life Through Self-Supervised Learning](https://ieeexplore.ieee.org/document/9477085) |
+| ProtT5 | RostLab | [HuggingFace](https://huggingface.co/Rostlab/prot_t5_xl_uniref50) |[ProtTrans: Toward Understanding the Language of Life Through Self-Supervised Learning](https://ieeexplore.ieee.org/document/9477085) |
+| ESMplusplus (ESMC) | EvolutionaryScale/Synthra | [HuggingFace](https://huggingface.co/Synthyra/ESMplusplus_small)/[Github](https://github.com/evolutionaryscale/esm) | - |
+| AntiBERTa2-CSSP | Alchemab | [HuggingFace](https://huggingface.co/alchemab/antiberta2-cssp) | [Enhancing Antibody Language Models with Structural Information](https://www.mlsb.io/papers_2023/Enhancing_Antibody_Language_Models_with_Structural_Information.pdf) |
 
 
-## License
-MIT 
+## Footnotes
+[^1]: I'll be updating the list as I see more examples, as well as for any that I've missed.

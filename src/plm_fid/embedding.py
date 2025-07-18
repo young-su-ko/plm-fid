@@ -3,7 +3,6 @@ from Bio import SeqIO
 from pathlib import Path
 import warnings
 from tqdm import tqdm
-import numpy as np
 from transformers import logging as hf_logging
 
 from .models import MODEL_MAP
@@ -18,6 +17,7 @@ class ProteinEmbedder:
     Internal class for embedding protein sequences using pretrained protein language models.
     This class is used by `FrechetProteinDistance` and is not intended for direct use (as of yet).
     """
+
     def __init__(
         self,
         model_name: str = "esm2_650m",
@@ -68,9 +68,10 @@ class ProteinEmbedder:
 
         if self.truncation_style == "end":
             return sequence[: self.max_length]
-        else:  # center
-            start = (len(sequence) - self.max_length) // 2
-            return sequence[start : start + self.max_length]
+
+        else:  # preserve N- and C-termini, drop from the center
+            keep_each_side = self.max_length // 2
+            return sequence[:keep_each_side] + sequence[-keep_each_side:]
 
     @torch.no_grad()
     def _embed_batch(self, sequences: list[str]) -> torch.Tensor:
