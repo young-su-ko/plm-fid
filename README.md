@@ -1,7 +1,7 @@
 # plm-fid: Fréchet Distance from pLM Embeddings
 ![cli_demo](https://raw.githubusercontent.com/young-su-ko/plm-fid/main/_assets/cli_demo.gif)
 
-This tool computes the Fréchet Distance between two sets of protein sequences based on their protein language model (pLM) embeddings.
+This tool computes the [Fréchet Distance](https://en.wikipedia.org/wiki/Fr%C3%A9chet_inception_distance) between two sets of protein sequences based on their protein language model (pLM) embeddings. This metric is often used for image generation ([see original paper](https://arxiv.org/pdf/1706.08500)), but has also seen some popularity for protein generation ([see Acknowledgements](#Acknowledgements)).
 
 When you pass in FASTA files, the specified model is loaded from the HuggingFace Hub using `transformers`. 
 > [!NOTE]  
