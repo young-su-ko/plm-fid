@@ -14,6 +14,10 @@ hf_logging.set_verbosity_error()
 
 
 class ProteinEmbedder:
+    """
+    Internal class for embedding protein sequences using pretrained protein language models.
+    This class is used by `FrechetProteinDistance` and is not intended for direct use (as of yet).
+    """
     def __init__(
         self,
         model_name: str = "esm2_650m",
@@ -22,6 +26,7 @@ class ProteinEmbedder:
         truncation_style: str = "center",
         batch_size: int = 1,
     ):
+        self.model_name = model_name
         self.device = self._get_device(device)
         self.batch_size = batch_size
         self.truncation_style = truncation_style
@@ -69,6 +74,9 @@ class ProteinEmbedder:
 
     @torch.no_grad()
     def _embed_batch(self, sequences: list[str]) -> torch.Tensor:
+        """
+        Embed a batch of sequences with mean pooling.
+        """
         sequences = [self._truncate_sequence(seq) for seq in sequences]
 
         if self.preprocessor:
@@ -83,10 +91,23 @@ class ProteinEmbedder:
         embeddings = outputs.last_hidden_state.mean(dim=1)
         return embeddings.cpu()
 
-    def _embed_fasta(self, fasta_path: str | Path) -> np.ndarray:
+    def _embed_fasta(self, fasta_path: str | Path) -> torch.Tensor:
+        """
+        Embed sequences from a FASTA file.
+        """
         sequences = []
-        for record in SeqIO.parse(str(fasta_path), "fasta"):
+        path = Path(fasta_path)
+        for record in SeqIO.parse(str(path), "fasta"):
             sequences.append(str(record.seq))
+
+        if self.model_name == "antiberta2_cssp":
+            # And no | exists in any fasta entry, raise warning that if using paired-chain fasta, each entry should be formatted as:
+            # >name
+            # heavy_sequence|light_sequence
+            if not any("|" in seq for seq in sequences):
+                warnings.warn(
+                    "No | found in any fasta entry. If using paired-chain fasta, each entry should be formatted as: >name\nheavy_sequence|light_sequence"
+                )
 
         all_embeddings = []
         for i in tqdm(

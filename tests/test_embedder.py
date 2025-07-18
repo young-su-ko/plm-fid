@@ -43,3 +43,12 @@ class TestProteinEmbedder:
         assert isinstance(embeddings, torch.Tensor)
         assert embeddings.ndim == 2
         assert embeddings.shape[1] == 1280
+
+    def test_embed_fasta_antiberta2_cssp(self, fasta_file: Path):
+        embedder = ProteinEmbedder(model_name="antiberta2_cssp")
+        # Make sure the | -> [SEP] is working
+        test_antibodies = [
+            "QVQIQQWGAGLLKPSETLSLTCAVYDESFSDYFWTWIRQSPGMGLEWIGEVTHTGSANYNPSLMSRVTMSRDTSKNQISLKLTSVTAADTAVYYCARDSPLGSIIKRGDYWGQGTLVTVSS|DIQMTQSPSSLSASVGDRVTVTCQASQGITNYVNWYQQKPGKAPKLLIYHASHLETGVPSRFSGSGSGTDFTFTISSLQPEDFATYYCQQFDHLPPTFGQGTRLEIK"
+        ]
+        embeddings = embedder._embed_batch(test_antibodies)
+        assert isinstance(embeddings, torch.Tensor)

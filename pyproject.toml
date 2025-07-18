@@ -1,6 +1,6 @@
 [project]
 name = "plm-fid"
-version = "0.1.0"
+version = "0.1.1"
 description = "Calculate Fréchet distance for protein language model embeddings"
 authors = [{ name="Young Su Ko", email="youngsuko2000@gmail.com" }]
 readme = "README.md"

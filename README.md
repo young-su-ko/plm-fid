@@ -24,8 +24,17 @@ pip install plm-fid[torch]
 
 ### CLI
 ```bash
-plm-fid setA.fasta setB.fasta --model-name esm2_8m
+plm-fid setA.fasta setB.fasta
 ```
+> [!TIP]
+> CLI expects paths to files only. These should be either `.fasta` files (raw protein sequences) or `.npy` or `.pt` files (pre-computed embeddings)
+
+> [!TIP]
+> To see all available options, run:
+> ```bash
+> plm-fid --help
+> ```
+
 | CLI/API Arguments | Description |
 | --- | --- |
 |`model-name`            | 	The protein language model to use. Please specify a lowercase string, such as `esm2_8m`, `protbert`, or `antiberta2_cssp`. See available models with `FrechetProteinDistance.available_models()`. Defaults to `esm2_650m`.|
@@ -59,9 +68,9 @@ emb_b = torch.load("embeddings_b.pt")     # shape: [N, D]
 distance = fid.compute_fid(emb_a, emb_b)
 ```
 > [!NOTE]
-> All API arguments are shared with the CLI, except using underscores instead of dash (e.g. `model_name`)
+> The API accepts both **file paths and in-memory arrays/tensors**. Argument names use underscores instead of dashes (e.g., model_name).
 
-### Automatic Format Resolution
+### Automatic Format Resolution in API
 The `compute_fid()` method accepts:
 - `.fasta` file paths
 - `.npy` or `.pt` file paths
@@ -91,7 +100,14 @@ fid.compute_fid(set_a "emb_b.pt")
     - If the embedding dimensions differ, `calculate_frechet_distance()` in `distance.py` will raise an error.
 > [!WARNING]  
 > However, if **different models produce embeddings of the same dimension**, this will not raise an error, but the FID is likely meaningless.
+
+### **AntiBERTa2-Specific Notes**
 - AntiBERTa2 has a max sequence length of 254. This will be enforced automatically.
+- For paired-chain FASTA input, format each entry as:
+```
+>name
+heavy_sequence|light_sequence
+```
 
 ## Examples
 ### Distinguishing CATH Classes

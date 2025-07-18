@@ -18,6 +18,14 @@ def space_protein_sequence(seq: str) -> str:
     return " ".join(list(seq))
 
 
+def antiberta_preprocessor(seq: str) -> str:
+    """Detects heavy and light chains and returns them separately."""
+    heavy_chain, light_chain = seq.split("|")
+    heavy_chain = space_protein_sequence(heavy_chain)
+    light_chain = space_protein_sequence(light_chain)
+    return f"{heavy_chain} [SEP] {light_chain}"
+
+
 MODEL_FAMILY_CONFIGS: dict[str, dict] = {
     "esm2": {
         "model_class": EsmModel,
@@ -58,9 +66,9 @@ MODEL_FAMILY_CONFIGS: dict[str, dict] = {
     "antiberta": {
         "model_class": RoFormerModel,
         "tokenizer_class": RoFormerTokenizer,
-        "model_kwargs": {"trust_remote_code": True},
+        "model_kwargs": {},
         "tokenizer_kwargs": {},
-        "preprocessor": space_protein_sequence,
+        "preprocessor": antiberta_preprocessor,
         "tokenizer_on_model": False,
         "max_sequence_length": 254,
     },
