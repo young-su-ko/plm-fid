@@ -95,7 +95,7 @@ fid.compute_fid(set_a "emb_b.pt")
 
 
 ### **Important Notes**
-
+- Computing the FID will take longer for models with bigger dimensions (e.g. ESM2 3B) because of the larger covariance matrix.
 - When mixing FASTA with pre-computed embeddings, make sure the model used to embed the FASTA file is the same as the one used to generate the `.npy` or `.pt` embeddings. A warning will be issued if there’s a mismatch.
     - If the embedding dimensions differ, `calculate_frechet_distance()` in `distance.py` will raise an error.
 > [!WARNING]  
