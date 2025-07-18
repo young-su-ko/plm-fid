@@ -20,10 +20,14 @@ def space_protein_sequence(seq: str) -> str:
 
 def antiberta_preprocessor(seq: str) -> str:
     """Detects heavy and light chains and returns them separately."""
-    heavy_chain, light_chain = seq.split("|")
-    heavy_chain = space_protein_sequence(heavy_chain)
-    light_chain = space_protein_sequence(light_chain)
-    return f"{heavy_chain} [SEP] {light_chain}"
+    if "|" in seq:
+        heavy_chain, light_chain = seq.split("|")
+        heavy_chain = space_protein_sequence(heavy_chain)
+        light_chain = space_protein_sequence(light_chain) 
+        return f"{heavy_chain} [SEP] {light_chain}"
+    else:
+        return space_protein_sequence(seq)
+
 
 
 MODEL_FAMILY_CONFIGS: dict[str, dict] = {

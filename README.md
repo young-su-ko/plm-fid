@@ -108,24 +108,34 @@ fid.compute_fid(set_a "emb_b.pt")
 >name
 heavy_sequence|light_sequence
 ```
+> [!IMPORTANT]
+> If you're using a standard protein language model with paired-chain data, note that the `|` character may be treated as an unknown token by most tokenizers. This typically doesn't cause a crash, but it can affect embedding quality.
 
 ## Examples
-### Distinguishing CATH Classes
-We use the [CATH S20 dataset](https://www.google.com/placeholderfornow) to compare Class 1 and Class 2 proteins. Class 1 proteins are primarily **alpha-helical**, while Class 2 are mostly **beta-sheet**.
+Here are two example use cases of pLM-based FID. These were primarily sanity-checks for myself to make sure the metric behaves as expected.
+The central idea in both examples is the following:
+Given two known protein distributions, $P$ and $Q$, that are believed to be distinct:
+- Sample a **reference** set and set $A$ from distribution $P$
+- Sample set $B$ from distribution $Q$.
 
-We provide three FASTA files in `examples/`
-- `class1.fasta`: Class 1 proteins (1953 sequences)
-- `class2.fasta`: Class 2 proteins (1953 sequences)
-- `reference.fasta`: A different subset of Class 1 proteins, also 1953 sequences
-
-Our hypothesis is that:
+then our hypothesis is:
 ```math
-\texttt{plmFID}(\text{ref, class1}) < \texttt{plmFID}(\text{ref, class2})
+\texttt{plmFID}(\text{ref}, A) < \texttt{plmFID}(\text{ref}, B)
 ```
-Even though CATH classification is structural, we expect pLM embeddings to encode features that reflect these differences in fold.
+where $\texttt{plmFID}$ refers to the Fréchet distance computed using the mean and covariance of their pLM embeddings.
+
+### Distinguishing CATH Classes
+Using the [CATH S20 dataset](http://download.cathdb.info/cath/releases/latest-release/non-redundant-data-sets/), this example tests whether pLM-based Fréchet distance can distinguish between CATH classes, specifically Class 1 and Class 2 proteins. Class 1 proteins are primarily **alpha-helical**, while Class 2 are mostly **beta-sheet**. Even though the Class is based on secondary-structure, we expect pLM embeddings to encode features that reflect these differences in fold.
+
+Let $P$ be the distribution of Class 1 proteins, and $Q$ the distribution of Class 2 proteins.
+
+We provide the FASTA files in `examples/cath` containing 1953 sequences each.
+- `reference.fasta`: from $P$
+- `class1.fasta`: set $A$ from $P$
+- `class2.fasta`: set $B$ from $Q$
 
 #### Results
-| Model | plmFID(ref, class1) | plmFID(ref, class2) |
+| Model | plmFID(ref, $A$) | plmFID(ref, $B$) |
 | --- | --- | --- |
 | ESM2 (8M) | 0.11 | 2.52 |
 | ESM2 (35M)| 0.16 | 2.15 |
@@ -138,16 +148,34 @@ Even though CATH classification is structural, we expect pLM embeddings to encod
 | ProtT5| 0.15 | 0.74 |
 | ESM++ (S)| 0.01 | 0.07 |
 | ESM++ (L)| 0.01 | 0.11 |
- 
 
-<!-- ### Distinguishing some binding antibodies (?)
+Across all pLMs, the expected behavior is observed. However, maybe this task is simply too trivial, so we move on to the second example. 
+
+### Distinguishing antibodies binding to the SARS-CoV-2 Spike Protein's RBD vs NTD
+The SARS-CoV-2 spike (S) protein contains two major domains that are frequent targets of neutralizing antibodies: the receptor-binding domain (RBD) and the N-terminal domain (NTD). Although both domains are part of the same protein, they differ in sequence and structure, raising the question of whether pLM embeddings can capture these biologically meaningful distinctions. In principle, antibodies that bind to the RBD versus the NTD should differ in their sequence features, as each domain presents distinct epitopes that shape antibody binding preferences.
+
+From the [CoV-AbDab](https://opig.stats.ox.ac.uk/webapps/covabdab/) database, I filtered for antibodies with both heavy and light chains that bind to either the NTD or RBD. There were only 587 NTD antibodies compared to 7141 RBD antibodies, so to get equal number of sequences, I randomly sampled 587 RBD antibodies to be the reference and another distinct 587 RBD antibodies to be $A$.
+
+Let $P$ be the distribution of RBD-binding antibodies, and $Q$ the distribution of NTD-binding antibodies.
+
+We provide the FASTA files in `examples/cov` containing 587 sequences each.
+- `reference.fasta`: from $P$
+- `rbd.fasta`: set $A$ from $P$
+- `ntd.fasta`: set $B$ from $Q$
 
 #### Results
-| Model | plmFID(ref, class1) | plmFID(ref, class2) |
+| Model | plmFID(ref, $A$) | plmFID(ref, $B$) |
 | --- | --- | --- |
-| AntiBERTa2-CSSP | X | X | -->
+| AntiBERTa2-CSSP | 3.45 | 7.30 |
+
+As expected, the distance between the reference and NTD antibodies is greater than the distance between the reference and RBD antibodies. 
+
+### Conclusion
+These initial sanity checks suggest that pLM-based FID can distinguish between protein groups with known structural and functional differences. That said, this was primarily a personal validation, a way to ensure the metric and code behave as expected. I’m not claiming this is a novel, comprehensive, or sufficient benchmark!
 
 ## Acknowledgements
+
+
 
 ## License
 MIT 
